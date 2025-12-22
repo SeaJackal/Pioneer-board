@@ -3,15 +3,7 @@
 {
     "name": "HydroOS",
     // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-    // "image": "mcr.microsoft.com/devcontainers/base:focal"
-    "build": {
-        "dockerfile": "Dockerfile",
-        "args": {
-            "USERNAME": "hydrolib",
-            "GID": "${localEnv:UID}",
-            "UID": "${localEnv:UID}"
-        }
-    },
+    "image": "seajackal/hydrodrivers:latest",
     "runArgs": [
         "--privileged",
         "--security-opt",

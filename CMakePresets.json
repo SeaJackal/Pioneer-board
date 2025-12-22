@@ -24,7 +24,6 @@
             "name": "F4",
             "inherits": "target",
             "hidden": true,
-            "toolchainFile": "${sourceDir}/thirdparty/Hydrodrivers/resources/gcc-arm-none-eabi-f4.cmake",
             "cacheVariables": {
                 "CMAKE_C_FLAGS": "-DSTM32F407xx",
                 "CMAKE_CXX_FLAGS": "-DSTM32F407xx",
