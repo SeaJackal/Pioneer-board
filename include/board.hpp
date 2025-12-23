@@ -6,6 +6,7 @@
 #include "hydrolib_stream_device.hpp"
 #include "hydrv_clock.hpp"
 #include "hydrv_rs_485.hpp"
+#include "hydrv_shell_uart.hpp"
 #include "hydrv_uart.hpp"
 
 extern "C"
@@ -55,7 +56,7 @@ private:
     static inline constinit hydrv::GPIO::GPIOLow tx_pin3_{
         hydrv::GPIO::GPIOLow::GPIOB_port, 10,
         hydrv::GPIO::GPIOLow::GPIO_UART_TX};
-    static inline constinit hydrv::UART::UART<255, 255> uart3_{
+    static inline constinit hydrv::UART::ShellUART<255, 255> uart3_{
         hydrv::UART::UARTLow::USART3_115200_LOW, rx_pin3_, tx_pin3_, 7};
 
     static inline hydrolib::device::DeviceManager device_manager_{
