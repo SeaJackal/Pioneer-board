@@ -14,7 +14,7 @@ void USART3_IRQHandler(void)
 
 void USART1_IRQHandler(void)
 {
-    pioneer::Board::uart1_.IRQCallback();
+    pioneer::Board::rs485_1_.IRQCallback();
 }
 
 void HardFault_Handler(void)

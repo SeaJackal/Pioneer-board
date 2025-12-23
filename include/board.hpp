@@ -5,6 +5,7 @@
 #include "hydrolib_shell.hpp"
 #include "hydrolib_stream_device.hpp"
 #include "hydrv_clock.hpp"
+#include "hydrv_rs_485.hpp"
 #include "hydrv_uart.hpp"
 
 extern "C"
@@ -39,10 +40,14 @@ private:
     static inline constinit hydrv::GPIO::GPIOLow tx_pin1_{
         hydrv::GPIO::GPIOLow::GPIOB_port, 6,
         hydrv::GPIO::GPIOLow::GPIO_UART_TX};
-    static inline constinit hydrv::UART::UART<255, 255> uart1_{
-        hydrv::UART::UARTLow::USART1_115200_LOW, rx_pin1_, tx_pin1_, 7};
+    static inline constinit hydrv::GPIO::GPIOLow direction_pin1_{
+        hydrv::GPIO::GPIOLow::GPIOB_port, 5, hydrv::GPIO::GPIOLow::GPIO_Output};
+    static inline constinit hydrv::RS485::RS485<255, 255> rs485_1_{
+        hydrv::UART::UARTLow::USART1_115200_LOW, rx_pin1_, tx_pin1_,
+        direction_pin1_, 7};
 
-    static inline hydrolib::device::StreamDevice uart1_device_{"uart1", uart1_};
+    static inline hydrolib::device::StreamDevice<decltype(rs485_1_)>
+        rs485_1_device_{"rs485", rs485_1_};
 
     static inline constinit hydrv::GPIO::GPIOLow rx_pin3_{
         hydrv::GPIO::GPIOLow::GPIOB_port, 11,
@@ -54,7 +59,7 @@ private:
         hydrv::UART::UARTLow::USART3_115200_LOW, rx_pin3_, tx_pin3_, 7};
 
     static inline hydrolib::device::DeviceManager device_manager_{
-        &uart1_device_};
+        &rs485_1_device_};
 
     static inline hydrolib::shell::Shell<
         decltype(uart3_), hydrolib::shell::CommandMap::CommandType,
@@ -66,7 +71,7 @@ inline Board::Board()
 {
     clock_.Init();
     NVIC_SetPriorityGrouping(0);
-    uart1_.Init();
+    rs485_1_.Init();
     uart3_.Init();
 }
 
