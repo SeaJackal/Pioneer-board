@@ -11,6 +11,9 @@
         "-v",
         "/dev/bus/usb:/dev/bus/usb:ro" // For OpenOCD flashing/debugging
     ],
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind"
+    ],
     "customizations": {
         "vscode": {
             "extensions": [
