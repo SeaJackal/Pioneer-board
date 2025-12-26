@@ -2,27 +2,16 @@
 
 extern "C"
 {
-void SysTick_Handler(void)
-{
-    pioneer::Board::clock_.SysTickHandler();
-}
+    void SysTick_Handler(void) { hydrv::clock::Clock::SysTickHandler(); }
 
-void USART3_IRQHandler(void)
-{
-    pioneer::Board::uart3_.IRQCallback();
-}
+    void USART3_IRQHandler(void) { pioneer::Board::uart3_.IRQCallback(); }
 
-void USART1_IRQHandler(void)
-{
-    pioneer::Board::rs485_1_.IRQCallback();
-}
+    void USART1_IRQHandler(void) { pioneer::Board::rs485_1_.IRQCallback(); }
 
-void HardFault_Handler(void)
-{
-    while (1)
+    void HardFault_Handler(void)
     {
+        while (1)
+        {
+        }
     }
 }
-}
-
-

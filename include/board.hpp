@@ -7,7 +7,6 @@
 #include "hydrv_clock.hpp"
 #include "hydrv_rs_485.hpp"
 #include "hydrv_shell_uart.hpp"
-#include "hydrv_uart.hpp"
 
 extern "C"
 {
@@ -28,13 +27,9 @@ class Board
 public:
     Board();
 
-public:
     void RunShell();
 
 private:
-    static inline constinit hydrv::clock::Clock clock_{
-        hydrv::clock::Clock::HSI_DEFAULT};
-
     static inline constinit hydrv::GPIO::GPIOLow rx_pin1_{
         hydrv::GPIO::GPIOLow::GPIOB_port, 7,
         hydrv::GPIO::GPIOLow::GPIO_UART_RX};
@@ -70,7 +65,7 @@ private:
 
 inline Board::Board()
 {
-    clock_.Init();
+    hydrv::clock::Clock::Init(hydrv::clock::Clock::HSI_DEFAULT);
     NVIC_SetPriorityGrouping(0);
     rs485_1_.Init();
     uart3_.Init();
