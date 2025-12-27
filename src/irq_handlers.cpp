@@ -6,7 +6,11 @@ extern "C"
 
     void USART3_IRQHandler(void) { pioneer::Board::uart3_.IRQCallback(); }
 
-    void USART1_IRQHandler(void) { pioneer::Board::rs485_1_.IRQCallback(); }
+    void USART1_IRQHandler(void)
+    {
+        pioneer::Board::rs485_1_.IRQCallback();
+        pioneer::Board::stream_manager_.Process();
+    }
 
     void HardFault_Handler(void)
     {

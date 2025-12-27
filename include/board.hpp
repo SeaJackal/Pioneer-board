@@ -1,5 +1,6 @@
 #pragma once
 
+#include "hydrolib_bus_datalink_stream.hpp"
 #include "hydrolib_command_map.hpp"
 #include "hydrolib_device_manager.hpp"
 #include "hydrolib_shell.hpp"
@@ -30,6 +31,8 @@ public:
     void RunShell();
 
 private:
+    static constexpr void *kLoggerStab = nullptr;
+
     static inline constinit hydrv::GPIO::GPIOLow rx_pin1_{
         hydrv::GPIO::GPIOLow::GPIOB_port, 7,
         hydrv::GPIO::GPIOLow::GPIO_UART_RX};
@@ -45,6 +48,14 @@ private:
     static inline hydrolib::device::StreamDevice<decltype(rs485_1_)>
         rs485_1_device_{"rs485", rs485_1_};
 
+    static inline constinit hydrolib::bus::datalink::StreamManager
+        stream_manager_{0x01, rs485_1_, kLoggerStab};
+    static inline hydrolib::bus::datalink::Stream shore_stream_{stream_manager_,
+                                                                0x02};
+
+    static inline hydrolib::device::StreamDevice shore_stream_device_{
+        "shore_stream", shore_stream_};
+
     static inline constinit hydrv::GPIO::GPIOLow rx_pin3_{
         hydrv::GPIO::GPIOLow::GPIOB_port, 11,
         hydrv::GPIO::GPIOLow::GPIO_UART_RX};
@@ -55,7 +66,7 @@ private:
         hydrv::UART::UARTLow::USART3_115200_LOW, rx_pin3_, tx_pin3_, 7};
 
     static inline hydrolib::device::DeviceManager device_manager_{
-        &rs485_1_device_};
+        &shore_stream_device_, &rs485_1_device_};
 
     static inline hydrolib::shell::Shell<
         decltype(uart3_), hydrolib::shell::CommandMap::CommandType,

@@ -35,6 +35,7 @@
             "inherits": "default",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
+                "LOGGER_TYPE": "none",
                 "BUILD_TESTS": "ON"
             }
         },
@@ -63,7 +64,9 @@
             "name": "DebugF4",
             "inherits": "F4",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "LOGGER_TYPE": "none",
+                "HYDRV_BUILD_EXAMPLES": "OFF"
             }
         }
     ],

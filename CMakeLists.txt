@@ -6,7 +6,7 @@ include(FetchContent)
 FetchContent_Declare(
     Hydrodrivers
     GIT_REPOSITORY https://github.com/SeaJackal/Hydrodrivers.git
-    GIT_TAG 2085bc4cdc769e927b65a2b39420ee56bef11b02
+    GIT_TAG 7b3c9e675b7085a2d67a61276d9153be405a1a54
 )
 FetchContent_Populate(Hydrodrivers)
 
@@ -25,4 +25,5 @@ add_executable(${PROJECT_NAME} src/main.cpp src/irq_handlers.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE HydrodriversClockCPP PRIVATE HydrodriversUART
-    PRIVATE HydrodriversShell PRIVATE HydrolibShellCommands PRIVATE HydrolibDevice)
+    PRIVATE HydrodriversShell PRIVATE HydrolibShellCommands
+    PRIVATE HydrolibDevice PRIVATE HydrolibBusDatalink)
