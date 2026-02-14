@@ -1,8 +1,10 @@
 #pragma once
 
+#include "hydrolib_bus_application_slave.hpp"
 #include "hydrolib_bus_datalink_stream.hpp"
 #include "hydrolib_command_map.hpp"
 #include "hydrolib_device_manager.hpp"
+#include "hydrolib_return_codes.hpp"
 #include "hydrolib_shell.hpp"
 #include "hydrolib_stream_device.hpp"
 #include "hydrv_clock.hpp"
@@ -10,6 +12,10 @@
 #include "hydrv_shell_uart.hpp"
 #include "hydrv_thruster.hpp"
 #include "hydrv_tim_low.hpp"
+
+#include "memory_map.hpp"
+#include <cstdint>
+#include <cstring>
 
 extern "C"
 {
@@ -28,6 +34,14 @@ class Board
     friend void ::USART1_IRQHandler(void);
 
 public:
+    class Memory
+    {
+    public:
+        hydrolib::ReturnCode Read(void *read_buffer, int address, int length);
+        hydrolib::ReturnCode Write(const void *write_buffer, int address,
+                                   int length);
+    };
+
     Board();
 
     void RunShell();
@@ -54,9 +68,12 @@ private:
         stream_manager_{0x01, rs485_1_, kLoggerStab};
     static inline hydrolib::bus::datalink::Stream shore_stream_{stream_manager_,
                                                                 0x02};
+    static inline Memory memory_{};
 
     static inline hydrolib::device::StreamDevice shore_stream_device_{
         "shore_stream", shore_stream_};
+    static inline hydrolib::bus::application::Slave slave_{
+        shore_stream_, memory_, kLoggerStab};
 
     static inline constinit hydrv::GPIO::GPIOLow rx_pin3_{
         hydrv::GPIO::GPIOLow::GPIOB_port, 11,
@@ -107,6 +124,10 @@ private:
         decltype(uart3_), hydrolib::shell::CommandMap::CommandType,
         hydrolib::shell::CommandMap>
         shell_{uart3_, hydrolib::shell::command_map};
+
+    static inline char a = 'a';
+    static inline char b = 'b';
+    static inline char c = 'c';
 };
 
 inline Board::Board()
@@ -129,4 +150,58 @@ inline void Board::RunShell()
     }
 }
 
+inline hydrolib::ReturnCode Board::Memory::Read(void *read_buffer, int address,
+                                                int length)
+{
+    switch (address)
+    {
+    case offsetof(MemoryMap, a):
+        memcpy(read_buffer, &a, sizeof(a));
+        break;
+    case offsetof(MemoryMap, b):
+        memcpy(read_buffer, &b, sizeof(b));
+        break;
+    case offsetof(MemoryMap, c):
+        memcpy(read_buffer, &c, sizeof(c));
+        break;
+    default:
+        return hydrolib::ReturnCode::FAIL;
+    }
+    length -= sizeof(a);
+    if (length > 0)
+    {
+
+        void *next_read_buffer =
+            static_cast<uint8_t *>(read_buffer) + sizeof(a);
+        return Read(next_read_buffer, address + sizeof(a), length);
+    }
+    return hydrolib::ReturnCode::OK;
+}
+
+inline hydrolib::ReturnCode Board::Memory::Write(const void *write_buffer,
+                                                 int address, int length)
+{
+    switch (address)
+    {
+    case offsetof(MemoryMap, a):
+        memcpy(&a, write_buffer, sizeof(a));
+        break;
+    case offsetof(MemoryMap, b):
+        memcpy(&b, write_buffer, sizeof(b));
+        break;
+    case offsetof(MemoryMap, c):
+        memcpy(&c, write_buffer, sizeof(c));
+        break;
+    default:
+        return hydrolib::ReturnCode::FAIL;
+    }
+    length -= sizeof(a);
+    if (length > 0)
+    {
+        const void *next_write_buffer =
+            static_cast<const uint8_t *>(write_buffer) + sizeof(a);
+        return Write(next_write_buffer, address + sizeof(a), length);
+    }
+    return hydrolib::ReturnCode::OK;
+}
 } // namespace pioneer
