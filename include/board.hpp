@@ -89,6 +89,11 @@ private:
         hydrv::thruster::Thruster::tim_prescaler,
         hydrv::thruster::Thruster::tim_counter_period};
 
+    static inline constinit hydrv::timer::TimerLow tim3_{
+        hydrv::timer::TimerLow::TIM3_low,
+        hydrv::thruster::Thruster::tim_prescaler,
+        hydrv::thruster::Thruster::tim_counter_period};
+
     static inline constinit hydrv::GPIO::GPIOLow tim_pin_0_{
         hydrv::GPIO::GPIOLow::GPIOA_port, 0, hydrv::GPIO::GPIOLow::GPIO_Timer};
     static inline constinit hydrv::GPIO::GPIOLow tim_pin_1_{
@@ -97,6 +102,10 @@ private:
         hydrv::GPIO::GPIOLow::GPIOA_port, 2, hydrv::GPIO::GPIOLow::GPIO_Timer};
     static inline constinit hydrv::GPIO::GPIOLow tim_pin_3_{
         hydrv::GPIO::GPIOLow::GPIOA_port, 3, hydrv::GPIO::GPIOLow::GPIO_Timer};
+    static inline constinit hydrv::GPIO::GPIOLow tim3_pin_0_{
+        hydrv::GPIO::GPIOLow::GPIOB_port, 0, hydrv::GPIO::GPIOLow::GPIO_Timer};
+    static inline constinit hydrv::GPIO::GPIOLow tim3_pin_1_{
+        hydrv::GPIO::GPIOLow::GPIOB_port, 1, hydrv::GPIO::GPIOLow::GPIO_Timer};
 
     static inline constinit hydrv::thruster::Thruster thruster_0_{0, tim_,
                                                                   tim_pin_0_};
@@ -106,6 +115,10 @@ private:
                                                                   tim_pin_2_};
     static inline constinit hydrv::thruster::Thruster thruster_3_{3, tim_,
                                                                   tim_pin_3_};
+    static inline constinit hydrv::thruster::Thruster thruster_4_{2, tim3_,
+                                                                  tim3_pin_0_};
+    static inline constinit hydrv::thruster::Thruster thruster_5_{3, tim3_,
+                                                                  tim3_pin_1_};
 
     static inline hydrolib::device::ThrusterDevice thruster_device_0_{
         "thr0", thruster_0_};
@@ -115,10 +128,15 @@ private:
         "thr2", thruster_2_};
     static inline hydrolib::device::ThrusterDevice thruster_device_3_{
         "thr3", thruster_3_};
+    static inline hydrolib::device::ThrusterDevice thruster_device_4_{
+        "thr4", thruster_4_};
+    static inline hydrolib::device::ThrusterDevice thruster_device_5_{
+        "thr5", thruster_5_};
 
     static inline hydrolib::device::DeviceManager device_manager_{
         &shore_stream_device_, &rs485_1_device_,    &thruster_device_0_,
-        &thruster_device_1_,   &thruster_device_2_, &thruster_device_3_};
+        &thruster_device_1_,   &thruster_device_2_, &thruster_device_3_,
+        &thruster_device_4_,   &thruster_device_5_};
 
     static inline hydrolib::shell::Shell<
         decltype(uart3_), hydrolib::shell::CommandMap::CommandType,
@@ -140,6 +158,8 @@ inline Board::Board()
     thruster_1_.Init();
     thruster_2_.Init();
     thruster_3_.Init();
+    thruster_4_.Init();
+    thruster_5_.Init();
 }
 
 inline void Board::RunShell()
