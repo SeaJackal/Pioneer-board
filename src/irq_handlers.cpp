@@ -10,6 +10,7 @@ extern "C"
     {
         pioneer::Board::rs485_1_.IRQCallback();
         pioneer::Board::stream_manager_.Process();
+        pioneer::Board::slave_.Process();
     }
 
     void HardFault_Handler(void)
