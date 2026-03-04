@@ -6,7 +6,7 @@ include(FetchContent)
 FetchContent_Declare(
     Hydrodrivers
     GIT_REPOSITORY https://github.com/SeaJackal/Hydrodrivers.git
-    GIT_TAG 8576aeb860ae95a5104169f9192a7517dafc5b27
+    GIT_TAG abeb489110048a7e337c2f62cdf6545afd2dd3d1
 )
 FetchContent_Populate(Hydrodrivers)
 
