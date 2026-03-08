@@ -5,7 +5,7 @@ namespace pioneer
 {
 struct MemoryMap
 {
-    int32_t connection_test;
+    int32_t board_id;
     int32_t thruster_speed_0;
     int32_t thruster_speed_1;
     int32_t thruster_speed_2;

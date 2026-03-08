@@ -143,7 +143,7 @@ private:
         hydrolib::shell::CommandMap>
         shell_{uart3_, hydrolib::shell::command_map};
 
-    static inline int32_t connection_test = 0xABABABAB;
+    static inline constexpr int32_t board_id = 0xABABABAB;
 };
 
 inline Board::Board()
@@ -171,12 +171,12 @@ inline void Board::RunShell()
 inline hydrolib::ReturnCode Board::Memory::Read(void *read_buffer, int address,
                                                 int length)
 {
+    int32_t speed;
     switch (address)
     {
-    case offsetof(MemoryMap, connection_test):
+    case offsetof(MemoryMap, board_id):
     {
-        uint32_t status = 0xABABABAB;
-        memcpy(read_buffer, &status, sizeof(status));
+        memcpy(read_buffer, &board_id, sizeof(board_id));
         break;
     }
 
@@ -189,35 +189,30 @@ inline hydrolib::ReturnCode Board::Memory::Read(void *read_buffer, int address,
     }
     case offsetof(MemoryMap, thruster_speed_1):
     {
-        int32_t speed;
         speed = thruster_1_.GetSpeed();
         memcpy(read_buffer, &speed, sizeof(speed));
         break;
     }
     case offsetof(MemoryMap, thruster_speed_2):
     {
-        int32_t speed;
         speed = thruster_2_.GetSpeed();
         memcpy(read_buffer, &speed, sizeof(speed));
         break;
     }
     case offsetof(MemoryMap, thruster_speed_3):
     {
-        int32_t speed;
         speed = thruster_3_.GetSpeed();
         memcpy(read_buffer, &speed, sizeof(speed));
         break;
     }
     case offsetof(MemoryMap, thruster_speed_4):
     {
-        int32_t speed;
         speed = thruster_4_.GetSpeed();
         memcpy(read_buffer, &speed, sizeof(speed));
         break;
     }
     case offsetof(MemoryMap, thruster_speed_5):
     {
-        int32_t speed;
         speed = thruster_5_.GetSpeed();
         memcpy(read_buffer, &speed, sizeof(speed));
         break;
@@ -239,50 +234,45 @@ inline hydrolib::ReturnCode Board::Memory::Read(void *read_buffer, int address,
 inline hydrolib::ReturnCode Board::Memory::Write(const void *write_buffer,
                                                  int address, int length)
 {
+    int32_t speed;
     switch (address)
     {
-    case offsetof(MemoryMap, connection_test):
+    case offsetof(MemoryMap, board_id):
     {
         return hydrolib::ReturnCode::FAIL;
     }
     case offsetof(MemoryMap, thruster_speed_0):
     {
-        int32_t speed;
         memcpy(&speed, write_buffer, sizeof(speed));
         thruster_0_.SetSpeed(speed);
         break;
     }
     case offsetof(MemoryMap, thruster_speed_1):
     {
-        int32_t speed;
         memcpy(&speed, write_buffer, sizeof(speed));
         thruster_1_.SetSpeed(speed);
         break;
     }
     case offsetof(MemoryMap, thruster_speed_2):
     {
-        int32_t speed;
         memcpy(&speed, write_buffer, sizeof(speed));
         thruster_2_.SetSpeed(speed);
         break;
     }
     case offsetof(MemoryMap, thruster_speed_3):
     {
-        int32_t speed;
         memcpy(&speed, write_buffer, sizeof(speed));
         thruster_3_.SetSpeed(speed);
         break;
     }
     case offsetof(MemoryMap, thruster_speed_4):
     {
-        int32_t speed;
         memcpy(&speed, write_buffer, sizeof(speed));
         thruster_4_.SetSpeed(speed);
         break;
     }
     case offsetof(MemoryMap, thruster_speed_5):
     {
-        int32_t speed;
         memcpy(&speed, write_buffer, sizeof(speed));
         thruster_5_.SetSpeed(speed);
         break;
