@@ -48,6 +48,7 @@ public:
 
 private:
     static constexpr void *kLoggerStab = nullptr;
+    static constexpr int32_t board_id = 0xABABABAB;
 
     static inline constinit hydrv::GPIO::GPIOLow rx_pin1_{
         hydrv::GPIO::GPIOLow::GPIOB_port, 7,
@@ -142,8 +143,6 @@ private:
         decltype(uart3_), hydrolib::shell::CommandMap::CommandType,
         hydrolib::shell::CommandMap>
         shell_{uart3_, hydrolib::shell::command_map};
-
-    static inline constexpr int32_t board_id = 0xABABABAB;
 };
 
 inline Board::Board()
@@ -182,7 +181,6 @@ inline hydrolib::ReturnCode Board::Memory::Read(void *read_buffer, int address,
 
     case offsetof(MemoryMap, thruster_speed_0):
     {
-        int32_t speed;
         speed = thruster_0_.GetSpeed();
         memcpy(read_buffer, &speed, sizeof(speed));
         break;
