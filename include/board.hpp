@@ -18,8 +18,6 @@
 #include <cstdint>
 #include <cstring>
 
-#define THRUST_COUNT 6
-
 extern "C"
 {
     void SysTick_Handler(void);
@@ -137,41 +135,42 @@ private:
     static inline hydrolib::device::ThrusterDevice thruster_device_5_{
         "thr5", thruster_5_};
 
-    static constexpr int THRUST_LIMIT = 1000;
-    static constexpr std::array<hydrv::thruster::Thruster *, THRUST_COUNT>
+    static constexpr int kThrustLimit = 1000;
+    static constexpr int kThrustCount = 6;
+    static constexpr std::array<hydrv::thruster::Thruster *, kThrustCount>
         thrusters_storage = {&thruster_0_, &thruster_1_, &thruster_2_,
                              &thruster_3_, &thruster_4_, &thruster_5_};
     static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, THRUST_COUNT>::ThrusterParamsArray
+        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
         thrust_to_x_rotation = {+0.0983, +0.0000, +0.0983,
                                 -0.0983, +0.0000, -0.0983};
     static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, THRUST_COUNT>::ThrusterParamsArray
+        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
         thrust_to_y_rotation = {-0.1806, -0.0520, +0.1806,
                                 +0.1806, -0.0520, -0.1806};
     static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, THRUST_COUNT>::ThrusterParamsArray
+        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
         thrust_to_z_rotation = {-0.1265, -0.1230, -0.1265,
                                 +0.1265, +0.1230, +0.1265};
     static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, THRUST_COUNT>::ThrusterParamsArray
+        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
         thrust_to_x_linearss = {+0.0000, +1.0000, +0.0000,
                                 +0.0000, +1.0000, +0.0000};
     static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, THRUST_COUNT>::ThrusterParamsArray
+        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
         thrust_to_y_linearss = {-0.5736, -0.0000, +0.5736,
                                 -0.5736, +0.0000, +0.5736};
     static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, THRUST_COUNT>::ThrusterParamsArray
+        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
         thrust_to_z_linearss = {+0.8192, +0.0000, +0.8192,
                                 +0.8192, +0.0000, +0.8192};
 
     static inline constinit hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, THRUST_COUNT>
+        hydrv::thruster::Thruster, kThrustCount>
         bfsdrk_0_{thrust_to_x_rotation, thrust_to_y_rotation,
                   thrust_to_z_rotation, thrust_to_x_linearss,
                   thrust_to_y_linearss, thrust_to_z_linearss,
-                  thrusters_storage,    THRUST_LIMIT};
+                  thrusters_storage,    kThrustLimit};
 
     static inline hydrolib::device::ThrustGeneratorDevice bfsdrk_device_{
         "bfsdrk", bfsdrk_0_};
