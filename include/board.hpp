@@ -4,6 +4,7 @@
 #include "hydrolib_bus_datalink_stream.hpp"
 #include "hydrolib_command_map.hpp"
 #include "hydrolib_device_manager.hpp"
+#include "hydrolib_fixed_point.hpp"
 #include "hydrolib_return_codes.hpp"
 #include "hydrolib_shell.hpp"
 #include "hydrolib_stream_device.hpp"
@@ -273,9 +274,53 @@ inline hydrolib::ReturnCode Board::Memory::Read(void *read_buffer, int address,
 inline hydrolib::ReturnCode Board::Memory::Write(const void *write_buffer,
                                                  int address, int length)
 {
+    hydrolib::controlling::Control control;
+    int32_t int_control;
     int32_t speed;
     switch (address)
     {
+    case offsetof(MemoryMap, int_control_.x_force):
+    {
+        memcpy(&int_control, write_buffer, sizeof(int_control));
+        control.x_force =
+            hydrolib::math::FixedPointBase::Deserialize(int_control);
+        break;
+    }
+    case offsetof(MemoryMap, int_control_.y_force):
+    {
+        memcpy(&int_control, write_buffer, sizeof(int_control));
+        control.y_force =
+            hydrolib::math::FixedPointBase::Deserialize(int_control);
+        break;
+    }
+    case offsetof(MemoryMap, int_control_.z_force):
+    {
+        memcpy(&int_control, write_buffer, sizeof(int_control));
+        control.z_force =
+            hydrolib::math::FixedPointBase::Deserialize(int_control);
+        break;
+    }
+    case offsetof(MemoryMap, int_control_.x_torque):
+    {
+        memcpy(&int_control, write_buffer, sizeof(int_control));
+        control.x_torque =
+            hydrolib::math::FixedPointBase::Deserialize(int_control);
+        break;
+    }
+    case offsetof(MemoryMap, int_control_.y_torque):
+    {
+        memcpy(&int_control, write_buffer, sizeof(int_control));
+        control.y_torque =
+            hydrolib::math::FixedPointBase::Deserialize(int_control);
+        break;
+    }
+    case offsetof(MemoryMap, int_control_.z_torque):
+    {
+        memcpy(&int_control, write_buffer, sizeof(int_control));
+        control.z_torque =
+            hydrolib::math::FixedPointBase::Deserialize(int_control);
+        break;
+    }
     case offsetof(MemoryMap, board_id):
     {
         return hydrolib::ReturnCode::FAIL;
@@ -325,6 +370,10 @@ inline hydrolib::ReturnCode Board::Memory::Write(const void *write_buffer,
         const void *next_write_buffer =
             static_cast<const uint8_t *>(write_buffer) + sizeof(int32_t);
         return Write(next_write_buffer, address + sizeof(int32_t), length);
+    }
+    else if (length == 0)
+    {
+        bfsdrk_device_.ControlProcess(control);
     }
     return hydrolib::ReturnCode::OK;
 }
