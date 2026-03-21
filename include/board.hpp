@@ -139,39 +139,38 @@ private:
     static constexpr int kThrustLimit = 1000;
     static constexpr int kThrustCount = 6;
     static constexpr std::array<hydrv::thruster::Thruster *, kThrustCount>
-        thrusters_storage = {&thruster_0_, &thruster_1_, &thruster_2_,
-                             &thruster_3_, &thruster_4_, &thruster_5_};
+        kThrusterStorage = {&thruster_0_, &thruster_1_, &thruster_2_,
+                            &thruster_3_, &thruster_4_, &thruster_5_};
     static constexpr hydrolib::controlling::ThrustGenerator<
         hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        thrust_to_x_rotation = {+0.0983, +0.0000, +0.0983,
-                                -0.0983, +0.0000, -0.0983};
+        kThrustToXRotation = {+0.0983, +0.0000, +0.0983,
+                              -0.0983, +0.0000, -0.0983};
     static constexpr hydrolib::controlling::ThrustGenerator<
         hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        thrust_to_y_rotation = {-0.1806, -0.0520, +0.1806,
-                                +0.1806, -0.0520, -0.1806};
+        kThrustToYRotation = {-0.1806, -0.0520, +0.1806,
+                              +0.1806, -0.0520, -0.1806};
     static constexpr hydrolib::controlling::ThrustGenerator<
         hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        thrust_to_z_rotation = {-0.1265, -0.1230, -0.1265,
-                                +0.1265, +0.1230, +0.1265};
+        kThrustToZRotation = {-0.1265, -0.1230, -0.1265,
+                              +0.1265, +0.1230, +0.1265};
     static constexpr hydrolib::controlling::ThrustGenerator<
         hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        thrust_to_x_linearss = {+0.0000, +1.0000, +0.0000,
-                                +0.0000, +1.0000, +0.0000};
+        kThrustToXLinearss = {+0.0000, +1.0000, +0.0000,
+                              +0.0000, +1.0000, +0.0000};
     static constexpr hydrolib::controlling::ThrustGenerator<
         hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        thrust_to_y_linearss = {-0.5736, -0.0000, +0.5736,
-                                -0.5736, +0.0000, +0.5736};
+        kThrustToYLinearss = {-0.5736, -0.0000, +0.5736,
+                              -0.5736, +0.0000, +0.5736};
     static constexpr hydrolib::controlling::ThrustGenerator<
         hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        thrust_to_z_linearss = {+0.8192, +0.0000, +0.8192,
-                                +0.8192, +0.0000, +0.8192};
+        kThrustToZLinearss = {+0.8192, +0.0000, +0.8192,
+                              +0.8192, +0.0000, +0.8192};
 
     static inline constinit hydrolib::controlling::ThrustGenerator<
         hydrv::thruster::Thruster, kThrustCount>
-        bfsdrk_0_{thrust_to_x_rotation, thrust_to_y_rotation,
-                  thrust_to_z_rotation, thrust_to_x_linearss,
-                  thrust_to_y_linearss, thrust_to_z_linearss,
-                  thrusters_storage,    kThrustLimit};
+        bfsdrk_0_{kThrustToXRotation, kThrustToYRotation, kThrustToZRotation,
+                  kThrustToXLinearss, kThrustToYLinearss, kThrustToZLinearss,
+                  kThrusterStorage,   kThrustLimit};
 
     static inline hydrolib::device::ThrustGeneratorDevice bfsdrk_device_{
         "bfsdrk", bfsdrk_0_};
@@ -220,7 +219,6 @@ inline hydrolib::ReturnCode Board::Memory::Read(void *read_buffer, int address,
         memcpy(read_buffer, &board_id, sizeof(board_id));
         break;
     }
-
     case offsetof(MemoryMap, thruster_speed_0):
     {
         speed = thruster_0_.GetSpeed();
@@ -275,50 +273,30 @@ inline hydrolib::ReturnCode Board::Memory::Write(const void *write_buffer,
                                                  int address, int length)
 {
     hydrolib::controlling::Control control;
-    int32_t int_control;
+    MemoryMap::ProtocolControl control_value;
     int32_t speed;
     switch (address)
     {
-    case offsetof(MemoryMap, int_control_.x_force):
+    case offsetof(MemoryMap, protocol_control):
     {
-        memcpy(&int_control, write_buffer, sizeof(int_control));
-        control.x_force =
-            hydrolib::math::FixedPointBase::Deserialize(int_control);
-        break;
-    }
-    case offsetof(MemoryMap, int_control_.y_force):
-    {
-        memcpy(&int_control, write_buffer, sizeof(int_control));
-        control.y_force =
-            hydrolib::math::FixedPointBase::Deserialize(int_control);
-        break;
-    }
-    case offsetof(MemoryMap, int_control_.z_force):
-    {
-        memcpy(&int_control, write_buffer, sizeof(int_control));
-        control.z_force =
-            hydrolib::math::FixedPointBase::Deserialize(int_control);
-        break;
-    }
-    case offsetof(MemoryMap, int_control_.x_torque):
-    {
-        memcpy(&int_control, write_buffer, sizeof(int_control));
-        control.x_torque =
-            hydrolib::math::FixedPointBase::Deserialize(int_control);
-        break;
-    }
-    case offsetof(MemoryMap, int_control_.y_torque):
-    {
-        memcpy(&int_control, write_buffer, sizeof(int_control));
-        control.y_torque =
-            hydrolib::math::FixedPointBase::Deserialize(int_control);
-        break;
-    }
-    case offsetof(MemoryMap, int_control_.z_torque):
-    {
-        memcpy(&int_control, write_buffer, sizeof(int_control));
-        control.z_torque =
-            hydrolib::math::FixedPointBase::Deserialize(int_control);
+        if (sizeof(write_buffer) >= sizeof(MemoryMap::ProtocolControl))
+        {
+            memcpy(&control_value, write_buffer,
+                   sizeof(MemoryMap::ProtocolControl));
+            control.x_force = hydrolib::math::FixedPointBase::Deserialize(
+                control_value.x_force);
+            control.y_force = hydrolib::math::FixedPointBase::Deserialize(
+                control_value.y_force);
+            control.z_force = hydrolib::math::FixedPointBase::Deserialize(
+                control_value.z_force);
+            control.x_torque = hydrolib::math::FixedPointBase::Deserialize(
+                control_value.x_torque);
+            control.y_torque = hydrolib::math::FixedPointBase::Deserialize(
+                control_value.y_torque);
+            control.z_torque = hydrolib::math::FixedPointBase::Deserialize(
+                control_value.z_torque);
+            bfsdrk_device_.ControlProcess(control);
+        }
         break;
     }
     case offsetof(MemoryMap, board_id):
@@ -370,10 +348,6 @@ inline hydrolib::ReturnCode Board::Memory::Write(const void *write_buffer,
         const void *next_write_buffer =
             static_cast<const uint8_t *>(write_buffer) + sizeof(int32_t);
         return Write(next_write_buffer, address + sizeof(int32_t), length);
-    }
-    else if (length == 0)
-    {
-        bfsdrk_device_.ControlProcess(control);
     }
     return hydrolib::ReturnCode::OK;
 }
