@@ -279,7 +279,7 @@ inline hydrolib::ReturnCode Board::Memory::Write(const void *write_buffer,
     {
     case offsetof(MemoryMap, protocol_control):
     {
-        if (sizeof(write_buffer) >= sizeof(MemoryMap::ProtocolControl))
+        if (length >= sizeof(MemoryMap::ProtocolControl))
         {
             memcpy(&control_value, write_buffer,
                    sizeof(MemoryMap::ProtocolControl));
