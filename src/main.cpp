@@ -2,4 +2,4 @@
 
 pioneer::Board board;
 
-int main(void) { board.RunShell(); }
+int main(void) { board.RunExample(); }

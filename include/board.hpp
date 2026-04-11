@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hydrolib_bus_application_slave.hpp"
+#include "hydrolib_bus_application_master.hpp"
 #include "hydrolib_bus_datalink_stream.hpp"
 #include "hydrolib_command_map.hpp"
 #include "hydrolib_device_manager.hpp"
@@ -16,6 +16,7 @@
 #include "hydrv_tim_low.hpp"
 
 #include "memory_map.hpp"
+#include <chrono>
 #include <cstdint>
 #include <cstring>
 
@@ -36,21 +37,12 @@ class Board
     friend void ::USART1_IRQHandler(void);
 
 public:
-    class Memory
-    {
-    public:
-        hydrolib::ReturnCode Read(void *read_buffer, int address, int length);
-        hydrolib::ReturnCode Write(const void *write_buffer, int address,
-                                   int length);
-    };
-
     Board();
 
-    void RunShell();
+    void RunExample();
 
 private:
     static constexpr void *kLoggerStab = nullptr;
-    static constexpr int32_t board_id = 0xABABABAB;
 
     static inline constinit hydrv::GPIO::GPIOLow rx_pin1_{
         hydrv::GPIO::GPIOLow::GPIOB_port, 7,
@@ -68,15 +60,14 @@ private:
         rs485_1_device_{"rs485", rs485_1_};
 
     static inline constinit hydrolib::bus::datalink::StreamManager
-        stream_manager_{0x01, rs485_1_, kLoggerStab};
+        stream_manager_{2, rs485_1_, kLoggerStab};
     static inline hydrolib::bus::datalink::Stream shore_stream_{stream_manager_,
-                                                                0x02};
-    static inline Memory memory_{};
+                                                                3};
 
     static inline hydrolib::device::StreamDevice shore_stream_device_{
         "shore_stream", shore_stream_};
-    static inline hydrolib::bus::application::Slave slave_{
-        shore_stream_, memory_, kLoggerStab};
+    static inline hydrolib::bus::application::Master master_{shore_stream_,
+                                                             kLoggerStab};
 
     static inline constinit hydrv::GPIO::GPIOLow rx_pin3_{
         hydrv::GPIO::GPIOLow::GPIOB_port, 11,
@@ -87,98 +78,27 @@ private:
     static inline constinit hydrv::UART::ShellUART<255, 255> uart3_{
         hydrv::UART::UARTLow::USART3_115200_LOW, rx_pin3_, tx_pin3_, 7};
 
-    static inline constinit hydrv::timer::TimerLow tim_{
-        hydrv::timer::TimerLow::TIM5_low,
-        hydrv::thruster::Thruster::tim_prescaler,
-        hydrv::thruster::Thruster::tim_counter_period};
+    MemoryMap::SystemData system_data_for_write = {
+        .new_vma_statuses = {1, 1, 1, 1, 0, 0, 0, 1, 1, 0},
+        .light_status = 0,
+        .current_mission = 0,
+        .batL_voltage = 1000,
+        .batR_voltage = 1250,
+        .mission_names = {"mission 1", "mission 2", "mission 3", "--no name--"},
+        .error_logs = {"fuck error", "", "", ""}};
 
-    static inline constinit hydrv::timer::TimerLow tim3_{
-        hydrv::timer::TimerLow::TIM3_low,
-        hydrv::thruster::Thruster::tim_prescaler,
-        hydrv::thruster::Thruster::tim_counter_period};
-
-    static inline constinit hydrv::GPIO::GPIOLow tim_pin_0_{
-        hydrv::GPIO::GPIOLow::GPIOA_port, 0, hydrv::GPIO::GPIOLow::GPIO_Timer};
-    static inline constinit hydrv::GPIO::GPIOLow tim_pin_1_{
-        hydrv::GPIO::GPIOLow::GPIOA_port, 1, hydrv::GPIO::GPIOLow::GPIO_Timer};
-    static inline constinit hydrv::GPIO::GPIOLow tim_pin_2_{
-        hydrv::GPIO::GPIOLow::GPIOA_port, 2, hydrv::GPIO::GPIOLow::GPIO_Timer};
-    static inline constinit hydrv::GPIO::GPIOLow tim_pin_3_{
-        hydrv::GPIO::GPIOLow::GPIOA_port, 3, hydrv::GPIO::GPIOLow::GPIO_Timer};
-    static inline constinit hydrv::GPIO::GPIOLow tim3_pin_0_{
-        hydrv::GPIO::GPIOLow::GPIOB_port, 0, hydrv::GPIO::GPIOLow::GPIO_Timer};
-    static inline constinit hydrv::GPIO::GPIOLow tim3_pin_1_{
-        hydrv::GPIO::GPIOLow::GPIOB_port, 1, hydrv::GPIO::GPIOLow::GPIO_Timer};
-
-    static inline constinit hydrv::thruster::Thruster thruster_0_{0, tim_,
-                                                                  tim_pin_0_};
-    static inline constinit hydrv::thruster::Thruster thruster_1_{1, tim_,
-                                                                  tim_pin_1_};
-    static inline constinit hydrv::thruster::Thruster thruster_2_{2, tim_,
-                                                                  tim_pin_2_};
-    static inline constinit hydrv::thruster::Thruster thruster_3_{3, tim_,
-                                                                  tim_pin_3_};
-    static inline constinit hydrv::thruster::Thruster thruster_4_{2, tim3_,
-                                                                  tim3_pin_0_};
-    static inline constinit hydrv::thruster::Thruster thruster_5_{3, tim3_,
-                                                                  tim3_pin_1_};
-
-    static inline hydrolib::device::ThrusterDevice thruster_device_0_{
-        "thr0", thruster_0_};
-    static inline hydrolib::device::ThrusterDevice thruster_device_1_{
-        "thr1", thruster_1_};
-    static inline hydrolib::device::ThrusterDevice thruster_device_2_{
-        "thr2", thruster_2_};
-    static inline hydrolib::device::ThrusterDevice thruster_device_3_{
-        "thr3", thruster_3_};
-    static inline hydrolib::device::ThrusterDevice thruster_device_4_{
-        "thr4", thruster_4_};
-    static inline hydrolib::device::ThrusterDevice thruster_device_5_{
-        "thr5", thruster_5_};
-
-    static constexpr int kThrustLimit = 1000;
-    static constexpr int kThrustCount = 6;
-    static constexpr std::array<hydrv::thruster::Thruster *, kThrustCount>
-        kThrusterStorage = {&thruster_0_, &thruster_1_, &thruster_2_,
-                            &thruster_3_, &thruster_4_, &thruster_5_};
-    static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        kThrustToXRotation = {+0.0983, +0.0000, +0.0983,
-                              -0.0983, +0.0000, -0.0983};
-    static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        kThrustToYRotation = {-0.1806, -0.0520, +0.1806,
-                              +0.1806, -0.0520, -0.1806};
-    static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        kThrustToZRotation = {-0.1265, -0.1230, -0.1265,
-                              +0.1265, +0.1230, +0.1265};
-    static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        kThrustToXLinearss = {+0.0000, +1.0000, +0.0000,
-                              +0.0000, +1.0000, +0.0000};
-    static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        kThrustToYLinearss = {-0.5736, -0.0000, +0.5736,
-                              -0.5736, +0.0000, +0.5736};
-    static constexpr hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, kThrustCount>::ThrusterParamsArray
-        kThrustToZLinearss = {+0.8192, +0.0000, +0.8192,
-                              +0.8192, +0.0000, +0.8192};
-
-    static inline constinit hydrolib::controlling::ThrustGenerator<
-        hydrv::thruster::Thruster, kThrustCount>
-        bfsdrk_0_{kThrustToXRotation, kThrustToYRotation, kThrustToZRotation,
-                  kThrustToXLinearss, kThrustToYLinearss, kThrustToZLinearss,
-                  kThrusterStorage,   kThrustLimit};
-
-    static inline hydrolib::device::ThrustGeneratorDevice bfsdrk_device_{
-        "bfsdrk", bfsdrk_0_};
+    MemoryMap::SystemData system_data_for_read = {
+        .new_vma_statuses = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+        .light_status = 0,
+        .current_mission = 0,
+        .batL_voltage = -1,
+        .batR_voltage = -1,
+        .mission_names = {"--no name--", "--no name--", "--no name--",
+                          "--no name--"},
+        .error_logs = {"--no logs--", "", "", ""}};
 
     static inline hydrolib::device::DeviceManager device_manager_{
-        &shore_stream_device_, &rs485_1_device_,    &thruster_device_0_,
-        &thruster_device_1_,   &thruster_device_2_, &thruster_device_3_,
-        &thruster_device_4_,   &thruster_device_5_, &bfsdrk_device_};
+        &shore_stream_device_, &rs485_1_device_};
 
     static inline hydrolib::shell::Shell<
         decltype(uart3_), hydrolib::shell::CommandMap::CommandType,
@@ -192,163 +112,48 @@ inline Board::Board()
     NVIC_SetPriorityGrouping(0);
     rs485_1_.Init();
     uart3_.Init();
-    thruster_0_.Init();
-    thruster_1_.Init();
-    thruster_2_.Init();
-    thruster_3_.Init();
-    thruster_4_.Init();
-    thruster_5_.Init();
 }
 
-inline void Board::RunShell()
+using namespace std::literals::chrono_literals;
+inline void Board::RunExample()
 {
+    shell_.Process();
+    static constexpr auto kRequestTimeout = 5s;
+    std::chrono::steady_clock::time_point last_request_time_;
     while (1)
     {
         shell_.Process();
-    }
-}
-
-inline hydrolib::ReturnCode Board::Memory::Read(void *read_buffer, int address,
-                                                int length)
-{
-    int32_t speed;
-    switch (address)
-    {
-    case offsetof(MemoryMap, board_id):
-    {
-        memcpy(read_buffer, &board_id, sizeof(board_id));
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_0):
-    {
-        speed = thruster_0_.GetSpeed();
-        memcpy(read_buffer, &speed, sizeof(speed));
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_1):
-    {
-        speed = thruster_1_.GetSpeed();
-        memcpy(read_buffer, &speed, sizeof(speed));
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_2):
-    {
-        speed = thruster_2_.GetSpeed();
-        memcpy(read_buffer, &speed, sizeof(speed));
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_3):
-    {
-        speed = thruster_3_.GetSpeed();
-        memcpy(read_buffer, &speed, sizeof(speed));
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_4):
-    {
-        speed = thruster_4_.GetSpeed();
-        memcpy(read_buffer, &speed, sizeof(speed));
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_5):
-    {
-        speed = thruster_5_.GetSpeed();
-        memcpy(read_buffer, &speed, sizeof(speed));
-        break;
-    }
-    default:
-        return hydrolib::ReturnCode::FAIL;
-    }
-    length -= sizeof(int32_t);
-    if (length > 0)
-    {
-
-        void *next_read_buffer =
-            static_cast<uint8_t *>(read_buffer) + sizeof(int32_t);
-        return Read(next_read_buffer, address + sizeof(int32_t), length);
-    }
-    return hydrolib::ReturnCode::OK;
-}
-
-inline hydrolib::ReturnCode Board::Memory::Write(const void *write_buffer,
-                                                 int address, int length)
-{
-    hydrolib::controlling::Control control;
-    MemoryMap::ProtocolControl control_value;
-    int32_t speed;
-    switch (address)
-    {
-    case offsetof(MemoryMap, protocol_control):
-    {
-        if (length >= sizeof(MemoryMap::ProtocolControl))
+        if (std::chrono::steady_clock::now() - last_request_time_ >
+            kRequestTimeout)
         {
-            memcpy(&control_value, write_buffer,
-                   sizeof(MemoryMap::ProtocolControl));
-            control.x_force = hydrolib::math::FixedPointBase::Deserialize(
-                control_value.x_force);
-            control.y_force = hydrolib::math::FixedPointBase::Deserialize(
-                control_value.y_force);
-            control.z_force = hydrolib::math::FixedPointBase::Deserialize(
-                control_value.z_force);
-            control.x_torque = hydrolib::math::FixedPointBase::Deserialize(
-                control_value.x_torque);
-            control.y_torque = hydrolib::math::FixedPointBase::Deserialize(
-                control_value.y_torque);
-            control.z_torque = hydrolib::math::FixedPointBase::Deserialize(
-                control_value.z_torque);
-            bfsdrk_device_.ControlProcess(control);
+            // ПРИМЕР ДЛЯ ЗАПИСИ
+            /*master_.Write(&system_data_for_write, 0,
+                          sizeof(MemoryMap::SystemData));
+            stream_manager_.Process();
+            master_.Process();*/
+
+            // ПРИМЕР ДЛЯ ЧТЕНИЯ
+            master_.Read(&system_data_for_read, 0,
+                         sizeof(MemoryMap::SystemData));
+            for (int i = 0; i < 10; i++)
+            {
+                stream_manager_.Process();
+                hydrolib::ReturnCode result = master_.Process();
+                if (result == hydrolib::ReturnCode::NO_DATA ||
+                    result == hydrolib::ReturnCode::TIMEOUT)
+                {
+                    std::chrono::steady_clock::time_point last_request_time_1 =
+                        std::chrono::steady_clock::now();
+                    while (std::chrono::steady_clock::now() -
+                               last_request_time_1 <
+                           10ms)
+                    {
+                    }
+                    continue;
+                }
+            }
+            last_request_time_ = std::chrono::steady_clock::now();
         }
-        break;
     }
-    case offsetof(MemoryMap, board_id):
-    {
-        return hydrolib::ReturnCode::FAIL;
-    }
-    case offsetof(MemoryMap, thruster_speed_0):
-    {
-        memcpy(&speed, write_buffer, sizeof(speed));
-        thruster_0_.SetSpeed(speed);
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_1):
-    {
-        memcpy(&speed, write_buffer, sizeof(speed));
-        thruster_1_.SetSpeed(speed);
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_2):
-    {
-        memcpy(&speed, write_buffer, sizeof(speed));
-        thruster_2_.SetSpeed(speed);
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_3):
-    {
-        memcpy(&speed, write_buffer, sizeof(speed));
-        thruster_3_.SetSpeed(speed);
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_4):
-    {
-        memcpy(&speed, write_buffer, sizeof(speed));
-        thruster_4_.SetSpeed(speed);
-        break;
-    }
-    case offsetof(MemoryMap, thruster_speed_5):
-    {
-        memcpy(&speed, write_buffer, sizeof(speed));
-        thruster_5_.SetSpeed(speed);
-        break;
-    }
-    default:
-        return hydrolib::ReturnCode::FAIL;
-    }
-    length -= sizeof(int32_t);
-    if (length > 0)
-    {
-        const void *next_write_buffer =
-            static_cast<const uint8_t *>(write_buffer) + sizeof(int32_t);
-        return Write(next_write_buffer, address + sizeof(int32_t), length);
-    }
-    return hydrolib::ReturnCode::OK;
 }
 } // namespace pioneer
