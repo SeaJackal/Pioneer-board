@@ -79,23 +79,22 @@ private:
         hydrv::UART::UARTLow::USART3_115200_LOW, rx_pin3_, tx_pin3_, 7};
 
     MemoryMap::SystemData system_data_for_write = {
-        .new_vma_statuses = {1, 1, 1, 1, 0, 0, 0, 1, 1, 0},
+        .vma_statuses = {1, 1, 1, 1, 0, 0, 0, 1, 1, 0},
         .light_status = 0,
         .current_mission = 0,
         .batL_voltage = 1000,
         .batR_voltage = 1250,
-        .mission_names = {"mission 1", "mission 2", "mission 3", "--no name--"},
-        .error_logs = {"fuck error", "", "", ""}};
+        .mission_names = {"mission 1", "mission 2", "mission 3", "mission 4"},
+        .error_logs = {"error 1", "error 2", "error 3", ""}};
 
     MemoryMap::SystemData system_data_for_read = {
-        .new_vma_statuses = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-        .light_status = 0,
-        .current_mission = 0,
-        .batL_voltage = -1,
-        .batR_voltage = -1,
-        .mission_names = {"--no name--", "--no name--", "--no name--",
-                          "--no name--"},
-        .error_logs = {"--no logs--", "", "", ""}};
+        .vma_statuses = {0, 0, 1, -1, -1, -1, -1, -1, -1, -1},
+        .light_status = 2,
+        .current_mission = 1,
+        .batL_voltage = 0,
+        .batR_voltage = 0,
+        .mission_names = {"", "", "", ""},
+        .error_logs = {"", "", "", ""}};
 
     static inline hydrolib::device::DeviceManager device_manager_{
         &shore_stream_device_, &rs485_1_device_};
